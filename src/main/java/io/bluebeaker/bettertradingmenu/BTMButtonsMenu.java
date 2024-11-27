@@ -41,6 +41,7 @@ public class BTMButtonsMenu extends GuiScreen {
     public BTMButtonsMenu(ContainerMerchant containerMerchant) {
         this.containerMerchant = containerMerchant;
         this.mc = Minecraft.getMinecraft();
+        this.fontRenderer = mc.fontRenderer;
     }
 
     public void setLeftTop(int x, int y) {
@@ -54,6 +55,10 @@ public class BTMButtonsMenu extends GuiScreen {
         this.updateButtonsAndSize();
     }
 
+    public MerchantRecipeList getRecipes(){
+        return this.recipes;
+    }
+
     public void updateButtonsAndSize() {
         GuiScreen screen = mc.currentScreen;
         if (screen != null) {
@@ -64,7 +69,7 @@ public class BTMButtonsMenu extends GuiScreen {
         this.buttonList.clear();
         if (this.recipes == null)
             return;
-        int end = Math.min(recipes.size(),scrollIndex+MAX_BUTTONS);
+        int end = Math.min(recipes.size(), scrollIndex + MAX_BUTTONS);
         for (int i = scrollIndex; i < end; i++) {
             MerchantRecipe recipe = recipes.get(i);
             this.buttonList.add(new MerchantButton(i, this.x, this.y + (i - scrollIndex) * 20, "", recipe, this));
@@ -75,12 +80,12 @@ public class BTMButtonsMenu extends GuiScreen {
         return Math.max(0, this.recipes.size() - MAX_BUTTONS);
     }
 
-    public void selectIndex(int index) {
+    public void onRecipePressed(int index) {
         this.containerMerchant.setCurrentRecipeIndex(index);
         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
         packetbuffer.writeInt(index);
         mc.getConnection().sendPacket(new CPacketCustomPayload("MC|TrSel", packetbuffer));
-        BTMManager.selectIndex(index);
+        BTMManager.onRecipePressed(index);
     }
 
     public boolean isMouseOver() {
@@ -127,11 +132,19 @@ public class BTMButtonsMenu extends GuiScreen {
                 GlStateManager.enableLighting();
                 this.itemRender.zLevel = 100.0F;
 
-                drawItemStack(recipe.getItemToBuy(), 2, 2, null);
-                ItemStack secondItem = recipe.getSecondItemToBuy();
-                if (secondItem != null)
-                    drawItemStack(secondItem, 20, 2, null);
-                drawItemStack(recipe.getItemToSell(), 62, 2, null);
+                ItemStack stack1 = recipe.getItemToBuy();
+                drawItemStack(stack1, 2, 2, null);
+                this.drawTooltipForHoveredItem(2, 2, mouseX, mouseY, stack1);
+
+                ItemStack stack2 = recipe.getSecondItemToBuy();
+                if (stack2 != null) {
+                    drawItemStack(stack2, 20, 2, null);
+                    this.drawTooltipForHoveredItem(20, 2, mouseX, mouseY, stack2);
+                }
+
+                ItemStack stack3 = recipe.getItemToSell();
+                drawItemStack(stack3, 62, 2, null);
+                this.drawTooltipForHoveredItem(62, 2, mouseX, mouseY, stack3);
 
                 GlStateManager.disableLighting();
 
@@ -153,6 +166,18 @@ public class BTMButtonsMenu extends GuiScreen {
             }
         }
 
+        private boolean isMouseOverItem(int itemX, int itemY, int mouseX, int mouseY) {
+            int relX = mouseX - this.x;
+            int relY = mouseY - this.y;
+            return relX > itemX && relY >= itemY && relX < itemX + 18 && relY < itemY + 18;
+        }
+
+        private void drawTooltipForHoveredItem(int itemX,int itemY,int mouseX,int mouseY,ItemStack stack){
+            if(stack!=null && !stack.isEmpty() && this.isMouseOverItem(itemX, itemY, mouseX, mouseY)){
+                menu.renderToolTip(stack, mouseX-this.x, mouseY-this.y);
+            }
+        }
+
         private void drawItemStack(ItemStack stack, int x, int y, String altText) {
             this.itemRender.renderItemAndEffectIntoGUI(stack, x, y);
             this.itemRender.renderItemOverlays(this.fontRenderer, stack, x, y);
@@ -162,7 +187,7 @@ public class BTMButtonsMenu extends GuiScreen {
         public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
             boolean pressed = super.mousePressed(mc, mouseX, mouseY);
             if (pressed) {
-                this.menu.selectIndex(id);
+                this.menu.onRecipePressed(id);
                 return true;
             }
             return false;
