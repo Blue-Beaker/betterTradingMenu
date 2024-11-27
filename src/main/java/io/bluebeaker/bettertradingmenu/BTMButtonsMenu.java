@@ -1,7 +1,11 @@
 package io.bluebeaker.bettertradingmenu;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 
+import org.lwjgl.input.Mouse;
+
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
@@ -11,6 +15,8 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.inventory.ContainerMerchant;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
@@ -25,6 +31,12 @@ public class BTMButtonsMenu extends GuiScreen {
 
     public static final int BUTTON_WIDTH = 80;
     public static final int BUTTON_HEIGHT = 20;
+    public static final int MAX_BUTTONS = 8;
+
+    private int scrollIndex = 0;
+
+    public static final ResourceLocation MERCHANT_GUI_TEXTURE = new ResourceLocation(
+            BetterTradingMenu.MODID, "textures/gui/villager2.png");
 
     public BTMButtonsMenu(ContainerMerchant containerMerchant) {
         this.containerMerchant = containerMerchant;
@@ -48,18 +60,27 @@ public class BTMButtonsMenu extends GuiScreen {
             this.width = screen.width;
             this.height = screen.height;
         }
+
         this.buttonList.clear();
         if (this.recipes == null)
             return;
-        int i = 0;
-        for (MerchantRecipe recipe : this.recipes) {
-            this.buttonList.add(new MerchantButton(i, this.x + 0, this.y + i * 20, "", recipe, this));
-            i++;
+        int end = Math.min(recipes.size(),scrollIndex+MAX_BUTTONS);
+        for (int i = scrollIndex; i < end; i++) {
+            MerchantRecipe recipe = recipes.get(i);
+            this.buttonList.add(new MerchantButton(i, this.x, this.y + (i - scrollIndex) * 20, "", recipe, this));
         }
+    }
+
+    public int getMaxScrollIndex() {
+        return Math.max(0, this.recipes.size() - MAX_BUTTONS);
     }
 
     public void selectIndex(int index) {
         this.containerMerchant.setCurrentRecipeIndex(index);
+        PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
+        packetbuffer.writeInt(index);
+        mc.getConnection().sendPacket(new CPacketCustomPayload("MC|TrSel", packetbuffer));
+        BTMManager.selectIndex(index);
     }
 
     public boolean isMouseOver() {
@@ -70,15 +91,13 @@ public class BTMButtonsMenu extends GuiScreen {
         return false;
     }
 
-    public Rectangle getMenuSize(){
-        return new Rectangle(this.x, this.y, BUTTON_WIDTH, BUTTON_HEIGHT*this.buttonList.size());
+    public Rectangle getMenuSize() {
+        return new Rectangle(this.x, this.y, BUTTON_WIDTH, BUTTON_HEIGHT * this.buttonList.size());
     }
 
     public static class MerchantButton extends GuiButton {
         public final MerchantRecipe recipe;
         private static Minecraft mc = Minecraft.getMinecraft();
-        private static final ResourceLocation MERCHANT_GUI_TEXTURE = new ResourceLocation(
-                "textures/gui/container/villager.png");
         private RenderItem itemRender;
         private FontRenderer fontRenderer;
         public final BTMButtonsMenu menu;
@@ -116,12 +135,16 @@ public class BTMButtonsMenu extends GuiScreen {
 
                 GlStateManager.disableLighting();
 
+                mc.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+                this.zLevel = 200.0F;
                 if (this.recipe.isRecipeDisabled()) {
-                    mc.getTextureManager().bindTexture(MERCHANT_GUI_TEXTURE);
-                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-                    GlStateManager.disableLighting();
-                    this.drawTexturedModalRect(40, 0, 212, 0, 28, 21);
+                    this.drawTexturedModalRect(40, 5, 25, 170, 10, 10);
+                } else {
+                    this.drawTexturedModalRect(40, 5, 15, 170, 10, 10);
                 }
+                this.zLevel = 0.0F;
 
                 this.itemRender.zLevel = 0.0F;
 
@@ -138,9 +161,6 @@ public class BTMButtonsMenu extends GuiScreen {
         @Override
         public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
             boolean pressed = super.mousePressed(mc, mouseX, mouseY);
-            // BetterTradingMenu.getLogger().atInfo()
-            //         .log("Mouse pressed" + this.enabled + " " + this.visible + " " + mouseX + " " + this.x + " "
-            //                 + mouseY + " " + this.y + " " + (this.x + this.width) + " " + (this.y + this.height));
             if (pressed) {
                 this.menu.selectIndex(id);
                 return true;
@@ -148,4 +168,21 @@ public class BTMButtonsMenu extends GuiScreen {
             return false;
         }
     }
+
+    @Override
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        int wheel = Mouse.getEventDWheel();
+        if (wheel != 0 && this.getMaxScrollIndex() > 0) {
+            if (wheel < 0 && this.scrollIndex < this.getMaxScrollIndex()) {
+                this.scrollIndex++;
+            }
+
+            if (wheel > 0 && this.scrollIndex > 0) {
+                this.scrollIndex--;
+            }
+            this.updateButtonsAndSize();
+        }
+    }
+
 }

@@ -3,6 +3,7 @@ package io.bluebeaker.bettertradingmenu;
 
 import java.awt.Rectangle;
 
+import io.bluebeaker.bettertradingmenu.mixin.AccessorGuiMerchant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiMerchant;
 import net.minecraft.client.gui.GuiScreen;
@@ -14,6 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class BTMManager {
     private static BTMButtonsMenu buttons;
+    private static GuiMerchant lastGUI;
     private static boolean newGUI = false;
     private static Minecraft mc = Minecraft.getMinecraft();
 
@@ -29,6 +31,7 @@ public class BTMManager {
         GuiScreen screen = event.getGui();
         if (!(screen instanceof GuiMerchant))
             return;
+        lastGUI=(GuiMerchant)screen;
         newGUI = true;
     }
 
@@ -73,4 +76,9 @@ public class BTMManager {
             buttons.drawScreen(event.getMouseX(), event.getMouseY(), 0);
         }
     }
+
+    public static void selectIndex(int index) {
+        ((AccessorGuiMerchant)lastGUI).setSelectedMerchantRecipe(index);
+    }
+    
 }
