@@ -26,6 +26,7 @@ public class BetterTradingMenu
     
     public BetterTradingMenu() {
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(BTMManager.class);
     }
     
     @EventHandler
@@ -44,7 +45,7 @@ public class BetterTradingMenu
         }
     }
 
-    public void logInfo(String log){
-        logger.info(log);
+    public static Logger getLogger(){
+        return logger;
     }
 }

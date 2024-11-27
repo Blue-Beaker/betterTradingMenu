@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import zone.rong.mixinbooter.ILateMixinLoader;
+import zone.rong.mixinbooter.IEarlyMixinLoader;
 
 @IFMLLoadingPlugin.Name("bettertradingmenu")
 @IFMLLoadingPlugin.MCVersion(ForgeVersion.mcVersion)
