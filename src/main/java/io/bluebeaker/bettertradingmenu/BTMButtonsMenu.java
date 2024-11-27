@@ -32,7 +32,6 @@ public class BTMButtonsMenu extends GuiScreen {
     public static final int BUTTON_WIDTH = 80;
     public static final int BUTTON_HEIGHT = 20;
     public static final int MAX_BUTTONS = 8;
-    
 
     private int scrollIndex = 0;
 
@@ -56,7 +55,7 @@ public class BTMButtonsMenu extends GuiScreen {
         this.updateButtonsAndSize();
     }
 
-    public MerchantRecipeList getRecipes(){
+    public MerchantRecipeList getRecipes() {
         return this.recipes;
     }
 
@@ -73,7 +72,7 @@ public class BTMButtonsMenu extends GuiScreen {
         int end = Math.min(recipes.size(), scrollIndex + MAX_BUTTONS);
         for (int i = scrollIndex; i < end; i++) {
             MerchantRecipe recipe = recipes.get(i);
-            this.buttonList.add(new MerchantButton(i, this.x, this.y + (i - scrollIndex) * 20, "", recipe, this));
+            this.buttonList.add(new GuiButtonTrade(i, this.x, this.y + (i - scrollIndex) * 20, "", recipe, this));
         }
     }
 
@@ -81,6 +80,7 @@ public class BTMButtonsMenu extends GuiScreen {
         return Math.max(0, this.recipes.size() - MAX_BUTTONS);
     }
 
+    /**When pressed on a trade button, transfer the items */
     public void onRecipePressed(int index) {
         this.containerMerchant.setCurrentRecipeIndex(index);
         PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
@@ -88,7 +88,8 @@ public class BTMButtonsMenu extends GuiScreen {
         mc.getConnection().sendPacket(new CPacketCustomPayload("MC|TrSel", packetbuffer));
         BTMManager.onRecipePressed(index);
     }
-    /**Get whether mouse is over this GUI */
+
+    /** Get whether mouse is over this GUI */
     public boolean isMouseOver() {
         for (GuiButton button : this.buttonList) {
             if (button.isMouseOver())
@@ -96,55 +97,69 @@ public class BTMButtonsMenu extends GuiScreen {
         }
         return false;
     }
-    /**Get menu size to use for JEI compat */
+
+    /** Get menu size to use for JEI compat */
     public Rectangle getMenuSize() {
         return new Rectangle(this.x, this.y, BUTTON_WIDTH, BUTTON_HEIGHT * this.buttonList.size());
     }
+    
+    /**Called to draw tooltip for any hovered item. */
+    public void drawTooltipForHoveredItem(int mouseX, int mouseY) {
+        drawTooltipForNonEmptyItem(getHoveredItem(mouseX, mouseY), mouseX, mouseY);
+    }
 
-    public void drawTooltipForHoveredItem(int mouseX,int mouseY){
-        for(GuiButton button:this.buttonList){
+    /** Get hovered item in menu. */
+    public ItemStack getHoveredItem(int mouseX, int mouseY) {
+        for (GuiButton button : this.buttonList) {
             MerchantRecipe recipe = recipes.get(button.id);
-            if(button.isMouseOver()){
-                drawTooltipForButtonWhenHovered(mouseX, mouseY, button, recipe);
+            if (button.isMouseOver()) {
+                return getHoveredItemForButton(mouseX, mouseY, button, recipe);
             }
         }
+        return ItemStack.EMPTY;
     }
 
-    private void drawTooltipForButtonWhenHovered(int mouseX, int mouseY, GuiButton button, MerchantRecipe recipe){
-        if(mouseY>=button.y+MerchantButton.ITEM_Y && mouseY<=button.y+MerchantButton.ITEM_Y+18){
-            if(mouseX>=button.x+MerchantButton.ITEM_X1 && mouseX<=button.x+MerchantButton.ITEM_X1+18){
-                this.drawTooltipForNonEmptyItem(recipe.getItemToBuy(), mouseX, mouseY);
-            }else if(mouseX>=button.x+MerchantButton.ITEM_X2 && mouseX<=button.x+MerchantButton.ITEM_X2+18){
-                this.drawTooltipForNonEmptyItem(recipe.getSecondItemToBuy(), mouseX, mouseY);
-            }if(mouseX>=button.x+MerchantButton.ITEM_X3 && mouseX<=button.x+MerchantButton.ITEM_X3+18){
-                this.drawTooltipForNonEmptyItem(recipe.getItemToSell(), mouseX, mouseY);
+    /** Get hovered item for the button. */
+    private ItemStack getHoveredItemForButton(int mouseX, int mouseY, GuiButton button, MerchantRecipe recipe) {
+        if (!(button instanceof GuiButtonTrade))
+            return ItemStack.EMPTY;
+        if (mouseY >= button.y + GuiButtonTrade.ITEM_Y && mouseY <= button.y + GuiButtonTrade.ITEM_Y + 18) {
+            if (mouseX >= button.x + GuiButtonTrade.ITEM_X1 && mouseX <= button.x + GuiButtonTrade.ITEM_X1 + 18) {
+                return recipe.getItemToBuy();
+            } else if (mouseX >= button.x + GuiButtonTrade.ITEM_X2
+                    && mouseX <= button.x + GuiButtonTrade.ITEM_X2 + 18) {
+                return recipe.getSecondItemToBuy();
+            }
+            if (mouseX >= button.x + GuiButtonTrade.ITEM_X3 && mouseX <= button.x + GuiButtonTrade.ITEM_X3 + 18) {
+                return recipe.getItemToSell();
             }
         }
+        return ItemStack.EMPTY;
     }
 
-    private void drawTooltipForNonEmptyItem(ItemStack stack,int x,int y){
-        if(stack!=null && !stack.isEmpty()){
-            GlStateManager.translate(0,0,512);
+    private void drawTooltipForNonEmptyItem(ItemStack stack, int x, int y) {
+        if (stack != null && !stack.isEmpty()) {
+            GlStateManager.translate(0, 0, 512);
             this.renderToolTip(stack, x, y);
-            GlStateManager.translate(0,0,-512);
+            GlStateManager.translate(0, 0, -512);
         }
     }
 
-    /**Button representing a trade */
-    public static class MerchantButton extends GuiButton {
+    /** Button representing a trade */
+    public static class GuiButtonTrade extends GuiButton {
         public final MerchantRecipe recipe;
         private static Minecraft mc = Minecraft.getMinecraft();
         private RenderItem itemRender;
         private FontRenderer fontRenderer;
         public final BTMButtonsMenu menu;
 
-        /**Position of the items */
+        /** Position of the items */
         public static final int ITEM_X1 = 2;
         public static final int ITEM_X2 = 20;
         public static final int ITEM_X3 = 62;
         public static final int ITEM_Y = 2;
 
-        public MerchantButton(int buttonId, int x, int y, String buttonText, MerchantRecipe recipe,
+        public GuiButtonTrade(int buttonId, int x, int y, String buttonText, MerchantRecipe recipe,
                 BTMButtonsMenu menu) {
             super(buttonId, x, y, BUTTON_WIDTH, BUTTON_HEIGHT, buttonText);
             this.recipe = recipe;

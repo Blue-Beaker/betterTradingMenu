@@ -84,14 +84,14 @@ public class BTMManager {
             buttons.drawTooltipForHoveredItem(event.getMouseX(), event.getMouseY());
         }
     }
-
+    /**Transfer items for the trade */
     public static void onRecipePressed(int index) {
         MerchantRecipe recipe = buttons.getRecipes().get(index);
         placeItemInSlot(recipe.getItemToBuy(), 0);
         placeItemInSlot(recipe.getSecondItemToBuy(), 1);
         ((AccessorGuiMerchant) lastGUI).setSelectedMerchantRecipe(index);
     }
-
+    /**Try to pull all of required items to the target slot. */
     private static void placeItemInSlot(ItemStack stack, int targetSlotIndex) {
         Slot targetSlot = lastGUI.inventorySlots.getSlot(targetSlotIndex);
         if(targetSlot.getHasStack()){
@@ -106,7 +106,7 @@ public class BTMManager {
             mc.playerController.windowClick(lastGUI.inventorySlots.windowId, targetSlotIndex, 0, ClickType.PICKUP, mc.player);
         }
     }
-
+    /**Find the item in container, returns slot.slotNumber. */
     private static List<Integer> findItemInContainer(ItemStack stack, Container container) {
         List<Integer> ids = new ArrayList<Integer>();
         for (Slot slot : container.inventorySlots) {
