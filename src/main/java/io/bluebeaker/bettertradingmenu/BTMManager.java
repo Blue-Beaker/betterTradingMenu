@@ -81,6 +81,7 @@ public class BTMManager {
             int y = (screen.height - 166) / 2;
             buttons.setLeftTop(x, y);
             buttons.drawScreen(event.getMouseX(), event.getMouseY(), 0);
+            buttons.drawTooltipForHoveredItem(event.getMouseX(), event.getMouseY());
         }
     }
 

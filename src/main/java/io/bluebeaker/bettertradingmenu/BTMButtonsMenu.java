@@ -32,6 +32,7 @@ public class BTMButtonsMenu extends GuiScreen {
     public static final int BUTTON_WIDTH = 80;
     public static final int BUTTON_HEIGHT = 20;
     public static final int MAX_BUTTONS = 8;
+    
 
     private int scrollIndex = 0;
 
@@ -87,7 +88,7 @@ public class BTMButtonsMenu extends GuiScreen {
         mc.getConnection().sendPacket(new CPacketCustomPayload("MC|TrSel", packetbuffer));
         BTMManager.onRecipePressed(index);
     }
-
+    /**Get whether mouse is over this GUI */
     public boolean isMouseOver() {
         for (GuiButton button : this.buttonList) {
             if (button.isMouseOver())
@@ -95,17 +96,53 @@ public class BTMButtonsMenu extends GuiScreen {
         }
         return false;
     }
-
+    /**Get menu size to use for JEI compat */
     public Rectangle getMenuSize() {
         return new Rectangle(this.x, this.y, BUTTON_WIDTH, BUTTON_HEIGHT * this.buttonList.size());
     }
 
+    public void drawTooltipForHoveredItem(int mouseX,int mouseY){
+        for(GuiButton button:this.buttonList){
+            MerchantRecipe recipe = recipes.get(button.id);
+            if(button.isMouseOver()){
+                drawTooltipForButtonWhenHovered(mouseX, mouseY, button, recipe);
+            }
+        }
+    }
+
+    private void drawTooltipForButtonWhenHovered(int mouseX, int mouseY, GuiButton button, MerchantRecipe recipe){
+        if(mouseY>=button.y+MerchantButton.ITEM_Y && mouseY<=button.y+MerchantButton.ITEM_Y+18){
+            if(mouseX>=button.x+MerchantButton.ITEM_X1 && mouseX<=button.x+MerchantButton.ITEM_X1+18){
+                this.drawTooltipForNonEmptyItem(recipe.getItemToBuy(), mouseX, mouseY);
+            }else if(mouseX>=button.x+MerchantButton.ITEM_X2 && mouseX<=button.x+MerchantButton.ITEM_X2+18){
+                this.drawTooltipForNonEmptyItem(recipe.getSecondItemToBuy(), mouseX, mouseY);
+            }if(mouseX>=button.x+MerchantButton.ITEM_X3 && mouseX<=button.x+MerchantButton.ITEM_X3+18){
+                this.drawTooltipForNonEmptyItem(recipe.getItemToSell(), mouseX, mouseY);
+            }
+        }
+    }
+
+    private void drawTooltipForNonEmptyItem(ItemStack stack,int x,int y){
+        if(stack!=null && !stack.isEmpty()){
+            GlStateManager.translate(0,0,512);
+            this.renderToolTip(stack, x, y);
+            GlStateManager.translate(0,0,-512);
+        }
+    }
+
+    /**Button representing a trade */
     public static class MerchantButton extends GuiButton {
         public final MerchantRecipe recipe;
         private static Minecraft mc = Minecraft.getMinecraft();
         private RenderItem itemRender;
         private FontRenderer fontRenderer;
         public final BTMButtonsMenu menu;
+
+        /**Position of the items */
+        public static final int ITEM_X1 = 2;
+        public static final int ITEM_X2 = 20;
+        public static final int ITEM_X3 = 62;
+        public static final int ITEM_Y = 2;
 
         public MerchantButton(int buttonId, int x, int y, String buttonText, MerchantRecipe recipe,
                 BTMButtonsMenu menu) {
@@ -133,18 +170,15 @@ public class BTMButtonsMenu extends GuiScreen {
                 this.itemRender.zLevel = 100.0F;
 
                 ItemStack stack1 = recipe.getItemToBuy();
-                drawItemStack(stack1, 2, 2, null);
-                this.drawTooltipForHoveredItem(2, 2, mouseX, mouseY, stack1);
+                drawItemStack(stack1, ITEM_X1, ITEM_Y, null);
 
                 ItemStack stack2 = recipe.getSecondItemToBuy();
                 if (stack2 != null) {
-                    drawItemStack(stack2, 20, 2, null);
-                    this.drawTooltipForHoveredItem(20, 2, mouseX, mouseY, stack2);
+                    drawItemStack(stack2, ITEM_X2, ITEM_Y, null);
                 }
 
                 ItemStack stack3 = recipe.getItemToSell();
-                drawItemStack(stack3, 62, 2, null);
-                this.drawTooltipForHoveredItem(62, 2, mouseX, mouseY, stack3);
+                drawItemStack(stack3, ITEM_X3, ITEM_Y, null);
 
                 GlStateManager.disableLighting();
 
@@ -163,18 +197,6 @@ public class BTMButtonsMenu extends GuiScreen {
 
                 GlStateManager.popMatrix();
 
-            }
-        }
-
-        private boolean isMouseOverItem(int itemX, int itemY, int mouseX, int mouseY) {
-            int relX = mouseX - this.x;
-            int relY = mouseY - this.y;
-            return relX > itemX && relY >= itemY && relX < itemX + 18 && relY < itemY + 18;
-        }
-
-        private void drawTooltipForHoveredItem(int itemX,int itemY,int mouseX,int mouseY,ItemStack stack){
-            if(stack!=null && !stack.isEmpty() && this.isMouseOverItem(itemX, itemY, mouseX, mouseY)){
-                menu.renderToolTip(stack, mouseX-this.x, mouseY-this.y);
             }
         }
 
