@@ -21,7 +21,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 
-public class BTMButtonsMenu extends GuiScreen {
+public class BTMTradeMenu extends GuiScreen {
 
     private MerchantRecipeList recipes;
     private ContainerMerchant containerMerchant;
@@ -38,7 +38,7 @@ public class BTMButtonsMenu extends GuiScreen {
     public static final ResourceLocation MERCHANT_GUI_TEXTURE = new ResourceLocation(
             BetterTradingMenu.MODID, "textures/gui/villager2.png");
 
-    public BTMButtonsMenu(ContainerMerchant containerMerchant) {
+    public BTMTradeMenu(ContainerMerchant containerMerchant) {
         this.containerMerchant = containerMerchant;
         this.mc = Minecraft.getMinecraft();
         this.fontRenderer = mc.fontRenderer;
@@ -151,7 +151,7 @@ public class BTMButtonsMenu extends GuiScreen {
         private static Minecraft mc = Minecraft.getMinecraft();
         private RenderItem itemRender;
         private FontRenderer fontRenderer;
-        public final BTMButtonsMenu menu;
+        public final BTMTradeMenu menu;
 
         /** Position of the items */
         public static final int ITEM_X1 = 2;
@@ -160,7 +160,7 @@ public class BTMButtonsMenu extends GuiScreen {
         public static final int ITEM_Y = 2;
 
         public GuiButtonTrade(int buttonId, int x, int y, String buttonText, MerchantRecipe recipe,
-                BTMButtonsMenu menu) {
+                BTMTradeMenu menu) {
             super(buttonId, x, y, BUTTON_WIDTH, BUTTON_HEIGHT, buttonText);
             this.recipe = recipe;
             this.itemRender = mc.getRenderItem();

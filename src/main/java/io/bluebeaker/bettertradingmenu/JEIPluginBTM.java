@@ -8,6 +8,6 @@ import mezz.jei.api.JEIPlugin;
 public class JEIPluginBTM implements IModPlugin {
 	@Override
 	public void register(IModRegistry registry) {
-		registry.addAdvancedGuiHandlers(new JEIMover());
+		registry.addAdvancedGuiHandlers(new BTMGuiHandler());
 	}
 }

@@ -20,18 +20,21 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class BTMManager {
-    private static BTMButtonsMenu buttons;
+    private static BTMTradeMenu tradeMenu;
     private static GuiMerchant lastGUI;
     private static boolean newGUI = false;
     private static Minecraft mc = Minecraft.getMinecraft();
+    private static int mouseX;
+    private static int mouseY;
 
+    /**Get menu area for JEI */
     public static Rectangle getMenuArea() {
-        if (buttons == null) {
+        if (tradeMenu == null) {
             return new Rectangle(0, 0, 0, 0);
         }
-        return buttons.getMenuSize();
+        return tradeMenu.getMenuSize();
     }
-
+    /**When new villager GUI opens */
     @SubscribeEvent
     public static void onVillagerGUIOpen(GuiOpenEvent event) {
         GuiScreen screen = event.getGui();
@@ -42,14 +45,18 @@ public class BTMManager {
     }
 
     private static boolean isVillagerGUIActivated(GuiScreen screen) {
-        return !newGUI && buttons != null && screen instanceof GuiMerchant;
+        return !newGUI && tradeMenu != null && screen instanceof GuiMerchant;
     }
 
+    public static ItemStack getHoveredItem(int mouseX,int mouseY){
+        return tradeMenu.getHoveredItem(mouseX, mouseY);
+    }
+    /**Make trades menu react to mouse when hovered in it. */
     @SubscribeEvent
     public static void onVillagerGUIMouse(GuiScreenEvent.MouseInputEvent.Pre event) {
-        if (isVillagerGUIActivated(event.getGui()) && buttons.isMouseOver()) {
+        if (isVillagerGUIActivated(event.getGui()) && tradeMenu.isMouseOver()) {
             try {
-                buttons.handleMouseInput();
+                tradeMenu.handleMouseInput();
                 event.setCanceled(true);
             } catch (Exception e) {
                 BetterTradingMenu.getLogger().error("Exception in GUI: ", e);
@@ -62,6 +69,8 @@ public class BTMManager {
         GuiScreen screen = event.getGui();
         if (!(screen instanceof GuiMerchant))
             return;
+        mouseX=event.getMouseX();
+        mouseY=event.getMouseY();
         if (newGUI) {
             MerchantRecipeList recipes = ((GuiMerchant) screen).getMerchant()
                     .getRecipes(mc.player);
@@ -72,21 +81,21 @@ public class BTMManager {
             if (container == null)
                 return;
 
-            buttons = new BTMButtonsMenu(container);
-            buttons.updateRecipes(recipes);
+            tradeMenu = new BTMTradeMenu(container);
+            tradeMenu.updateRecipes(recipes);
             newGUI = false;
         }
-        if (!newGUI && buttons != null) {
+        if (!newGUI && tradeMenu != null) {
             int x = (screen.width - 176) / 2 - 80;
             int y = (screen.height - 166) / 2;
-            buttons.setLeftTop(x, y);
-            buttons.drawScreen(event.getMouseX(), event.getMouseY(), 0);
-            buttons.drawTooltipForHoveredItem(event.getMouseX(), event.getMouseY());
+            tradeMenu.setLeftTop(x, y);
+            tradeMenu.drawScreen(mouseX, mouseY, 0);
+            tradeMenu.drawTooltipForHoveredItem(mouseX, mouseY);
         }
     }
     /**Transfer items for the trade */
     public static void onRecipePressed(int index) {
-        MerchantRecipe recipe = buttons.getRecipes().get(index);
+        MerchantRecipe recipe = tradeMenu.getRecipes().get(index);
         placeItemInSlot(recipe.getItemToBuy(), 0);
         placeItemInSlot(recipe.getSecondItemToBuy(), 1);
         ((AccessorGuiMerchant) lastGUI).setSelectedMerchantRecipe(index);
