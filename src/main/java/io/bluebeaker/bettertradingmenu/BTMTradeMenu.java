@@ -36,7 +36,7 @@ public class BTMTradeMenu extends GuiScreen {
     private int scrollIndex = 0;
 
     public static final ResourceLocation MERCHANT_GUI_TEXTURE = new ResourceLocation(
-            BetterTradingMenu.MODID, "textures/gui/villager2.png");
+            BetterTradingMenuMod.MODID, "textures/gui/villager2.png");
 
     public BTMTradeMenu(ContainerMerchant containerMerchant) {
         this.containerMerchant = containerMerchant;

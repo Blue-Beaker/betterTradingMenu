@@ -13,8 +13,8 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod(modid = BetterTradingMenu.MODID, name = BetterTradingMenu.NAME, version = BetterTradingMenu.VERSION, clientSideOnly = true)
-public class BetterTradingMenu
+@Mod(modid = BetterTradingMenuMod.MODID, name = BetterTradingMenuMod.NAME, version = BetterTradingMenuMod.VERSION, clientSideOnly = true)
+public class BetterTradingMenuMod
 {
     public static final String MODID = "bettertradingmenu";
     public static final String NAME = "BetterTradingMenu";
@@ -24,7 +24,7 @@ public class BetterTradingMenu
 
     private static Logger logger;
     
-    public BetterTradingMenu() {
+    public BetterTradingMenuMod() {
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(BTMManager.class);
     }

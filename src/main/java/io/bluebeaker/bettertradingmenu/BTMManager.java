@@ -61,7 +61,7 @@ public class BTMManager {
                 tradeMenu.handleMouseInput();
                 event.setCanceled(true);
             } catch (Exception e) {
-                BetterTradingMenu.getLogger().error("Exception in GUI: ", e);
+                BetterTradingMenuMod.getLogger().error("Exception in GUI: ", e);
             }
         }
     }
