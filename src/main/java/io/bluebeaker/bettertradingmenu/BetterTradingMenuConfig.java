@@ -7,7 +7,8 @@ import net.minecraftforge.common.config.Config.Type;
 
 @Config(modid = BetterTradingMenu.MODID,type = Type.INSTANCE,category = "general")
 public class BetterTradingMenuConfig {
-    @Comment("Example")
-    @LangKey("config.bettertradingmenu.example.name")
-    public static boolean example = true;
+    @Comment({"Move items when clicked a trade in this mod's menu.",
+    "when disabled, clicking a trade only selects it in the GUI."})
+    @LangKey("config.bettertradingmenu.move_items.name")
+    public static boolean move_items = true;
 }

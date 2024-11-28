@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod(modid = BetterTradingMenu.MODID, name = BetterTradingMenu.NAME, version = BetterTradingMenu.VERSION)
+@Mod(modid = BetterTradingMenu.MODID, name = BetterTradingMenu.NAME, version = BetterTradingMenu.VERSION, clientSideOnly = true)
 public class BetterTradingMenu
 {
     public static final String MODID = "bettertradingmenu";

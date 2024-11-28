@@ -98,6 +98,8 @@ public class BTMManager {
 
     /** Transfer items for the trade */
     public static void onRecipePressed(int index) {
+        if (!BetterTradingMenuConfig.move_items)
+            return;
         MerchantRecipe recipe = tradeMenu.getRecipes().get(index);
         placeItemInSlot(recipe.getItemToBuy(), 0);
         placeItemInSlot(recipe.getSecondItemToBuy(), 1);
