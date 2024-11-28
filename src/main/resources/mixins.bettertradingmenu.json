@@ -1,16 +1,11 @@
 {
-    "required": true,
-    "compatibilityLevel": "JAVA_8",
-    "package": "io.bluebeaker.bettertradingmenu.mixin",
-    "mixins": [
-      "AccessorGuiMerchant"
-    ],
-    "client": [
-    ],
-    "server": [
-    ],
-    "injectors": {
-      "defaultRequire": 1
-    },
-    "refmap": "mixins.bettertradingmenu.refmap.json"
+	"package": "io.bluebeaker.bettertradingmenu.mixin",
+	"required": true,
+	"refmap": "${mixin_refmap}",
+	"target": "@env(DEFAULT)",
+	"minVersion": "0.8.5",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [],
+	"server": [],
+	"client": ["AccessorGuiMerchant"]
   }

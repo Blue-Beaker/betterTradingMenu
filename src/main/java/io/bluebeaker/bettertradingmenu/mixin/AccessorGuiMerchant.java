@@ -8,5 +8,5 @@ import net.minecraft.client.gui.GuiMerchant;
 @Mixin(GuiMerchant.class)
 public interface AccessorGuiMerchant {
     @Accessor
-    public void setSelectedMerchantRecipe(int i);
+    void setSelectedMerchantRecipe(int i);
 }

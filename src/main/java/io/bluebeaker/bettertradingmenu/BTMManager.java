@@ -27,14 +27,15 @@ public class BTMManager {
     private static int mouseX;
     private static int mouseY;
 
-    /**Get menu area for JEI */
+    /** Get menu area for JEI */
     public static Rectangle getMenuArea() {
         if (tradeMenu == null) {
             return new Rectangle(0, 0, 0, 0);
         }
         return tradeMenu.getMenuSize();
     }
-    /**When new villager GUI opens */
+
+    /** When new villager GUI opens */
     @SubscribeEvent
     public static void onVillagerGUIOpen(GuiOpenEvent event) {
         GuiScreen screen = event.getGui();
@@ -48,10 +49,11 @@ public class BTMManager {
         return !newGUI && tradeMenu != null && screen instanceof GuiMerchant;
     }
 
-    public static ItemStack getHoveredItem(int mouseX,int mouseY){
+    public static ItemStack getHoveredItem(int mouseX, int mouseY) {
         return tradeMenu.getHoveredItem(mouseX, mouseY);
     }
-    /**Make trades menu react to mouse when hovered in it. */
+
+    /** Make trades menu react to mouse when hovered in it. */
     @SubscribeEvent
     public static void onVillagerGUIMouse(GuiScreenEvent.MouseInputEvent.Pre event) {
         if (isVillagerGUIActivated(event.getGui()) && tradeMenu.isMouseOver()) {
@@ -69,8 +71,8 @@ public class BTMManager {
         GuiScreen screen = event.getGui();
         if (!(screen instanceof GuiMerchant))
             return;
-        mouseX=event.getMouseX();
-        mouseY=event.getMouseY();
+        mouseX = event.getMouseX();
+        mouseY = event.getMouseY();
         if (newGUI) {
             MerchantRecipeList recipes = ((GuiMerchant) screen).getMerchant()
                     .getRecipes(mc.player);
@@ -93,29 +95,35 @@ public class BTMManager {
             tradeMenu.drawTooltipForHoveredItem(mouseX, mouseY);
         }
     }
-    /**Transfer items for the trade */
+
+    /** Transfer items for the trade */
     public static void onRecipePressed(int index) {
         MerchantRecipe recipe = tradeMenu.getRecipes().get(index);
         placeItemInSlot(recipe.getItemToBuy(), 0);
         placeItemInSlot(recipe.getSecondItemToBuy(), 1);
         ((AccessorGuiMerchant) lastGUI).setSelectedMerchantRecipe(index);
     }
-    /**Try to pull all of required items to the target slot. */
+
+    /** Try to pull all of required items to the target slot. */
     private static void placeItemInSlot(ItemStack stack, int targetSlotIndex) {
         Slot targetSlot = lastGUI.inventorySlots.getSlot(targetSlotIndex);
-        if(targetSlot.getHasStack()){
-            mc.playerController.windowClick(lastGUI.inventorySlots.windowId, targetSlotIndex, 0, ClickType.QUICK_MOVE, mc.player);
+        if (targetSlot.getHasStack()) {
+            mc.playerController.windowClick(lastGUI.inventorySlots.windowId, targetSlotIndex, 0, ClickType.QUICK_MOVE,
+                    mc.player);
         }
-        if(targetSlot.getHasStack()) return;
+        if (targetSlot.getHasStack())
+            return;
         List<Integer> ids = findItemInContainer(stack, lastGUI.inventorySlots);
-        if(!ids.isEmpty()){
+        if (!ids.isEmpty()) {
             int id = ids.get(0);
             mc.playerController.windowClick(lastGUI.inventorySlots.windowId, id, 0, ClickType.PICKUP, mc.player);
             mc.playerController.windowClick(lastGUI.inventorySlots.windowId, id, 0, ClickType.PICKUP_ALL, mc.player);
-            mc.playerController.windowClick(lastGUI.inventorySlots.windowId, targetSlotIndex, 0, ClickType.PICKUP, mc.player);
+            mc.playerController.windowClick(lastGUI.inventorySlots.windowId, targetSlotIndex, 0, ClickType.PICKUP,
+                    mc.player);
         }
     }
-    /**Find the item in container, returns slot.slotNumber. */
+
+    /** Find the item in container, returns slot.slotNumber. */
     private static List<Integer> findItemInContainer(ItemStack stack, Container container) {
         List<Integer> ids = new ArrayList<Integer>();
         for (Slot slot : container.inventorySlots) {
